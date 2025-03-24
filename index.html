@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>myDAT Services - SilverDAT Schnittstellen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            margin: 0;
+        }
+        .container-fluid {
+            padding: 0;
+        }
+        .header {
+            background-color: #fff;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            height: calc(100vh - 60px);
+            position: relative;
+            top: 60px;
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px 0;
+            color: #003087;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            color: #0056d2;
+        }
+        .main-content {
+            padding: 30px;
+        }
+        .icon-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: flex-start;
+        }
+        .icon-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: left;
+            width: calc(33.33% - 13.33px);
+            max-width: 200px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 180px; /* Feste Höhe für alle Kacheln */
+        }
+        .icon-section:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .icon-section i {
+            font-size: 1.5rem;
+            color: #003087;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .icon-section h3 {
+            font-size: 1rem;
+            margin: 0 0 5px 0;
+            color: #003087;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .icon-section p {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 0 0 10px 0;
+            flex-grow: 1; /* Füllt den verbleibenden Raum */
+        }
+        .icon-section a {
+            font-size: 0.8rem;
+            color: #0056d2;
+            text-decoration: none;
+            float: right;
+        }
+        .content-area {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease;
+        }
+        .content-area.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .api-card, .video-card, .release-note, .license-card, .variant-card {
+            background-color: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+        }
+        .api-card:hover, .video-card:hover, .release-note:hover, .license-card:hover, .variant-card:hover {
+            transform: translateY(-3px);
+        }
+        .api-status {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .status-active { color: #28a745; }
+        .status-warning { color: #ff9800; }
+        .status-inactive { color: #dc3545; }
+        .param-card {
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .param-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .param-item:last-child {
+            border-bottom: none;
+        }
+        .param-label {
+            font-size: 0.9rem;
+            color: #555;
+            margin: 0;
+        }
+        .param-value {
+            background-color: #f1f3f5;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            word-break: break-all;
+            display: inline-block;
+            color: #333;
+        }
+        .copy-btn {
+            margin-left: 10px;
+            cursor: pointer;
+            color: #007bff;
+            transition: color 0.2s;
+        }
+        .copy-btn:hover {
+            color: #0056d2;
+        }
+        .faq-item, .newsletter-item {
+            margin-bottom: 15px;
+        }
+        .faq-item summary, .newsletter-item summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #003087;
+        }
+        .video-card iframe {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+        }
+        .wizard-step {
+            display: none;
+        }
+        .wizard-step.active {
+            display: block;
+        }
+        .wizard-buttons {
+            margin-top: 20px;
+        }
+        .wizard-buttons button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #003087;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .wizard-buttons button:hover {
+            background-color: #0056d2;
+        }
+        .wizard-buttons button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .purchase-btn {
+            background-color: #28a745;
+            margin-top: 15px;
+        }
+        .purchase-btn:hover {
+            background-color: #218838;
+        }
+        .license-card p, .variant-card p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+        .license-card strong, .variant-card strong {
+            color: #003087;
+        }
+        .variant-card .status {
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .variant-card .action-btn {
+            padding: 5px 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        .variant-card .action-btn:hover {
+            background-color: #218838;
+        }
+        .variant-card .support-btn {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .variant-card .support-btn:hover {
+            background-color: #0056d2;
+        }
+        .tooltip-icon {
+            color: #007bff;
+            margin-left: 5px;
+            cursor: help;
+        }
+        .tab-buttons {
+            margin-bottom: 20px;
+        }
+        .tab-buttons button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .tab-buttons button.active {
+            background-color: #003087;
+            color: #fff;
+            border-color: #003087;
+        }
+        .tab-buttons button:hover {
+            background-color: #f5f5f5;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .filter-select {
+            margin-bottom: 15px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        h1, h2, h3, h4 {
+            color: #003087;
+        }
+        .logo {
+            height: 40px;
+        }
+        .license-group {
+            margin-bottom: 20px;
+        }
+        .license-group h4 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .license-group p {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+        }
+        .license-group hr {
+            border-top: 1px solid #e0e0e0;
+            margin: 15px 0;
+        }
+        .support-group {
+            margin-bottom: 20px;
+        }
+        .support-group h4 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        .support-group .mb-3 {
+            margin-bottom: 15px;
+        }
+        .support-group .form-label {
+            font-weight: bold;
+            color: #003087;
+        }
+        .support-group .form-control, .support-group .form-select {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            padding: 8px;
+            font-size: 0.9rem;
+        }
+        .support-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .support-group .required::after {
+            content: '*';
+            color: #dc3545;
+            margin-left: 5px;
+        }
+        .error-details {
+            display: none;
+        }
+        .error-details.active {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .icon-section {
+                width: calc(50% - 10px);
+            }
+            .license-card, .variant-card {
+                margin-bottom: 10px;
+            }
+            .license-group p {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header mit Logo -->
+        <div class="header">
+            <img src="https://gold.dat.de/_assets/1fe14ff0b2420ef1e57f498ad9374e34/Images/dat-logo-rd.svg" alt="DAT Logo" class="logo">
+        </div>
+
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <h2>myDAT Services</h2>
+                <a href="#">Dashboard</a>
+                <a href="#">Support-Anfrage</a>
+                <a href="#" class="active">SilverDAT Schnittstellen</a>
+                <a href="#">Meine Daten</a>
+                <a href="#">Meldungen</a>
+                <a href="#">Release-Notes</a>
+                <a href="#">Systemstatus</a>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 main-content">
+                <h1>DAT Interface Lounge</h1>
+                <p>Die DAT Interface Lounge ist ein Ort, an dem Sie Ihre Lizenz überprüfen, die API-Dokumentation erkunden, Antworten auf häufig gestellte Fragen finden und Support erhalten können.</p>
+
+                <!-- Icon-Bereich -->
+                <div class="icon-container">
+                    <div class="icon-section" data-content="license-overview">
+                        <i class="bi bi-file-earmark-check"></i>
+                        <h3>Lizenzübersicht</h3>
+                        <p>Ihre Lizenz- und Produktinformationen</p>
+                    </div>
+                    <div class="icon-section" data-content="interface-compendium">
+                        <i class="bi bi-book"></i>
+                        <h3>API Documentation</h3>
+                        <p>API-Dokumentation und Schnittstellenübersicht</p>
+                    </div>
+                    <div class="icon-section" data-content="faq">
+                        <i class="bi bi-question-circle"></i>
+                        <h3>FAQs anzeigen</h3>
+                        <p>Häufig gestellte Fragen</p>
+                    </div>
+                    <div class="icon-section" data-content="video-tutorials">
+                        <i class="bi bi-play-circle"></i>
+                        <h3>Video-Tutorials</h3>
+                        <p>Schritt-für-Schritt-Anleitungen</p>
+                    </div>
+                    <div class="icon-section" data-content="newsletters">
+                        <i class="bi bi-newspaper"></i>
+                        <h3>API-News</h3>
+                        <p>Neuigkeiten und Updates</p>
+                    </div>
+                    <div class="icon-section" data-content="release-notes">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <h3>Release Notes</h3>
+                        <p>Neueste Software-Updates</p>
+                    </div>
+                    <div class="icon-section" data-content="api-support">
+                        <i class="bi bi-code-slash"></i>
+                        <h3>API Support</h3>
+                        <p>Technische Unterstützung</p>
+                    </div>
+                </div>
+
+                <!-- Inhalte -->
+                <!-- FAQ -->
+                <div id="faq-content" class="content-area">
+                    <h2>Häufig gestellte Fragen (FAQs)</h2>
+
+                    <!-- Authentifizierung -->
+                    <div class="faq-category">
+                        <h3 class="mt-4">Authentifizierung</h3>
+                        <div class="accordion" id="authAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="authHeading1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#authCollapse1" aria-expanded="false" aria-controls="authCollapse1">
+                                        Welche Methode wird zur Authentifizierung verwendet?
+                                    </button>
+                                </h2>
+                                <div id="authCollapse1" class="accordion-collapse collapse" aria-labelledby="authHeading1" data-bs-parent="#authAccordion">
+                                    <div class="accordion-body">
+                                        Die Authentifizierung erfolgt mittels des DAT-AuthorizationToken (JWT im HTTP-Header). Dies wird als Transaction based Authentication Methode bezeichnet.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="authHeading2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#authCollapse2" aria-expanded="false" aria-controls="authCollapse2">
+                                        Wie erhalte ich ein DAT-AuthorizationToken?
+                                    </button>
+                                </h2>
+                                <div id="authCollapse2" class="accordion-collapse collapse" aria-labelledby="authHeading2" data-bs-parent="#authAccordion">
+                                    <div class="accordion-body">
+                                        Das DAT-AuthorizationToken wird durch einen Webservice generiert. Zur Erzeugung werden mindestens fünf Parameter benötigt: customerNumber, customerLogin (oder user), customerPassword (oder password), interfacePartnerNumber und interfacePartnerSignature. Optional kann die productVariant übergeben werden. Die interfacePartnerSignature kann NICHT selbst erzeugt werden, sondern wird von DAT zur Verfügung gestellt.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="authHeading3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#authCollapse3" aria-expanded="false" aria-controls="authCollapse3">
+                                        Wie lange ist ein DAT-AuthorizationToken gültig?
+                                    </button>
+                                </h2>
+                                <div id="authCollapse3" class="accordion-collapse collapse" aria-labelledby="authHeading3" data-bs-parent="#authAccordion">
+                                    <div class="accordion-body">
+                                        Der DAT-AuthorizationToken ist 30 Minuten gültig.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="authHeading4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#authCollapse4" aria-expanded="false" aria-controls="authCollapse4">
+                                        Wo muss der DAT-AuthorizationToken übergeben werden?
+                                    </button>
+                                </h2>
+                                <div id="authCollapse4" class="accordion-collapse collapse" aria-labelledby="authHeading4" data-bs-parent="#authAccordion">
+                                    <div class="accordion-body">
+                                        Der DAT-AuthorizationToken muss bei jedem Funktionsaufruf zur Authentifizierung im HTTP-Header übergeben werden. Bei der Oberflächenintegration für SilverDAT 3 valuateExpert/PlusPartner muss die Produktvariante zusätzlich im HTTPS-Header gesetzt werden.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="authHeading5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#authCollapse5" aria-expanded="false" aria-controls="authCollapse5">
+                                        Wie erfolgt die Anmeldung bei der Web API mit dem DAT-AuthorizationToken?
+                                    </button>
+                                </h2>
+                                <div id="authCollapse5" class="accordion-collapse collapse" aria-labelledby="authHeading5" data-bs-parent="#authAccordion">
+                                    <div class="accordion-body">
+                                        Die Anmeldung erfolgt durch die Übergabe des DAT-AuthorizationToken im HTTP-Header. Bei der Oberflächenintegration wird das Token in einem zweistufigen Prozess erstellt (mittels JSON.stringify) und dann angemeldet (mittels sphinx.credentials, valuateNGExternal.setToken oder rentalPricesExternal.setToken).
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="authHeading6">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#authCollapse6" aria-expanded="false" aria-controls="authCollapse6">
+                                        Welche Informationen werden für die Authentifizierung benötigt?
+                                    </button>
+                                </h2>
+                                <div id="authCollapse6" class="accordion-collapse collapse" aria-labelledby="authHeading6" data-bs-parent="#authAccordion">
+                                    <div class="accordion-body">
+                                        Für die Authentifizierung werden benötigt:
+                                        <ul>
+                                            <li><strong>customerNumber:</strong> Gültige Kundennummer mit Lizenz zum Produkt.</li>
+                                            <li><strong>customerLogin (oder user):</strong> Gültiger Benutzername zur angegebenen Kundennummer.</li>
+                                            <li><strong>customerPassword (oder password):</strong> Persönliches Kennwort des Benutzers.</li>
+                                            <li><strong>interfacePartnerNumber:</strong> Gültige Kundennummer des Schnittstellenpartners mit Lizenz zum Produkt.</li>
+                                            <li><strong>interfacePartnerSignature:</strong> Generierter SHA256 Hash für den Schnittstellenpartner (wird von DAT bereitgestellt).</li>
+                                            <li><strong>Optional: productVariant</strong> (z.B. valuateNG.expert, calculateExpert). Die Übergabe der Produktvariante ist bei SilverDAT valuateExpert und SilverDAT calculateExpert zwingend notwendig.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schadenkalkulation -->
+                    <div class="faq-category">
+                        <h3 class="mt-4">Schadenkalkulation</h3>
+                        <div class="accordion" id="damageAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="damageHeading1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#damageCollapse1" aria-expanded="false" aria-controls="damageCollapse1">
+                                        [Platzhalter: Wie wird eine Schadenkalkulation durchgeführt?]
+                                    </button>
+                                </h2>
+                                <div id="damageCollapse1" class="accordion-collapse collapse" aria-labelledby="damageHeading1" data-bs-parent="#damageAccordion">
+                                    <div class="accordion-body">
+                                        [Platzhalter: Beschreibung der Schadenkalkulation hier einfügen.]
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fahrzeugidentifikation -->
+                    <div class="faq-category">
+                        <h3 class="mt-4">Fahrzeugidentifikation</h3>
+                        <div class="accordion" id="vehicleIdAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="vehicleIdHeading1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#vehicleIdCollapse1" aria-expanded="false" aria-controls="vehicleIdCollapse1">
+                                        [Platzhalter: Wie erfolgt die Fahrzeugidentifikation über die API?]
+                                    </button>
+                                </h2>
+                                <div id="vehicleIdCollapse1" class="accordion-collapse collapse" aria-labelledby="vehicleIdHeading1" data-bs-parent="#vehicleIdAccordion">
+                                    <div class="accordion-body">
+                                        [Platzhalter: Beschreibung der Fahrzeugidentifikation hier einfügen.]
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fahrzeugbewertung -->
+                    <div class="faq-category">
+                        <h3 class="mt-4">Fahrzeugbewertung</h3>
+                        <div class="accordion" id="valuationAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="valuationHeading1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#valuationCollapse1" aria-expanded="false" aria-controls="valuationCollapse1">
+                                        [Platzhalter: Welche Daten werden für eine Fahrzeugbewertung benötigt?]
+                                    </button>
+                                </h2>
+                                <div id="valuationCollapse1" class="accordion-collapse collapse" aria-labelledby="valuationHeading1" data-bs-parent="#valuationAccordion">
+                                    <div class="accordion-body">
+                                        [Platzhalter: Beschreibung der Fahrzeugbewertung hier einfügen.]
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MyClaim -->
+                    <div class="faq-category">
+                        <h3 class="mt-4">MyClaim</h3>
+                        <div class="accordion" id="myClaimAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="myClaimHeading1">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#myClaimCollapse1" aria-expanded="false" aria-controls="myClaimCollapse1">
+                                        [Platzhalter: Was ist MyClaim und wie wird es integriert?]
+                                    </button>
+                                </h2>
+                                <div id="myClaimCollapse1" class="accordion-collapse collapse" aria-labelledby="myClaimHeading1" data-bs-parent="#myClaimAccordion">
+                                    <div class="accordion-body">
+                                        [Platzhalter: Beschreibung von MyClaim hier einfügen.]
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API-Selector (Wizard) -->
+                <div id="api-selector-content" class="content-area">
+                    <h2>API-Selector: Finden Sie die passende Schnittstelle</h2>
+                    <p>Nutzen Sie den Wizard, um eine neue API zu finden und zu konfigurieren.</p>
+                    <div id="wizard">
+                        <div class="wizard-step active" id="step1">
+                            <h3>Schritt 1: Welche Art von Daten benötigen Sie?</h3>
+                            <label><input type="radio" name="dataType" value="valuation"> Fahrzeugbewertung</label><br>
+                            <label><input type="radio" name="dataType" value="parts"> Teileinformationen</label><br>
+                            <label><input type="radio" name="dataType" value="config"> Konfiguration</label>
+                        </div>
+                        <div class="wizard-step" id="step2">
+                            <h3>Schritt 2: Welche Branche?</h3>
+                            <label><input type="radio" name="industry" value="finance"> Finanzwesen</label><br>
+                            <label><input type="radio" name="industry" value="repair"> Reparaturwerkstätten</label><br>
+                            <label><input type="radio" name="industry" value="insurance"> Versicherungen</label>
+                        </div>
+                        <div class="wizard-step" id="step3">
+                            <h3>Schritt 3: Ergebnis</h3>
+                            <p>Basierend auf Ihren Eingaben empfehlen wir Ihnen: <strong id="recommended-api"></strong></p>
+                            <button class="btn purchase-btn" id="purchaseBtn" onclick="purchaseAPI()">API erwerben</button>
+                        </div>
+                        <div class="wizard-buttons">
+                            <button id="prevBtn" disabled>Zurück</button>
+                            <button id="nextBtn">Weiter</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video-Tutorials -->
+                <div id="video-tutorials-content" class="content-area">
+                    <h2>Video-Tutorials für APIs</h2>
+                    <p>Erfahren Sie in diesen Tutorials, wie Sie unsere APIs optimal nutzen können.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="video-card">
+                                <h3>Einführung in die Schnittstellenpartner-API</h3>
+                                <iframe src="https://www.youtube.com/embed/N3bcM3b5CrUlkhdG" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="video-card">
+                                <h3>So nutzen Sie SilverDAT 3 Configuration</h3>
+                                <iframe src="https://www.youtube.com/embed/m1RdBSFrqbhlWvBG" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="video-card">
+                                <h3>Erste Schritte mit SilverDAT calculateGlass</h3>
+                                <iframe src="https://www.youtube.com/embed/ZwE3hvPT2RsoP2A" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API-Newsletter -->
+                <div id="newsletters-content" class="content-area">
+                    <h2>API-Newsletter</h2>
+                    <p>Hier finden Sie die neuesten Neuigkeiten und Updates zu unseren APIs.</p>
+                    <details class="newsletter-item">
+                        <summary>Newsletter März 2025</summary>
+                        <p>Veröffentlichung neuer Funktionen für die Schnittstellenpartner-API. Details zur Implementierung finden Sie in der Dokumentation.</p>
+                    </details>
+                    <details class="newsletter-item">
+                        <summary>Newsletter Januar 2025</summary>
+                        <p>Einführung der SilverDAT calculateGlass-API mit verbesserten Berechnungsalgorithmen.</p>
+                    </details>
+                </div>
+
+                <!-- Release Notes -->
+                <div id="release-notes-content" class="content-area">
+                    <h2>Release Notes</h2>
+                    <p>Überblick über die neuesten Software-Updates und Verbesserungen.</p>
+                    <div class="release-note">
+                        <h3>Release 2.1.0 (März 2025)</h3>
+                        <p>- Bugfix: Fehler bei der VIN-Abfrage behoben.<br>- Neue Funktion: Unterstützung für internationale Fahrzeugdaten.</p>
+                    </div>
+                    <div class="release-note">
+                        <h3>Release 2.0.9 (Februar 2025)</h3>
+                        <p>- Leistungsoptimierung für die Configuration-API.<br>- Sicherheitsupdates für alle Endpunkte.</p>
+                    </div>
+                </div>
+
+                <!-- API Support -->
+                <div id="api-support-content" class="content-area">
+                    <h2>API Support</h2>
+                    <p>Erstellen Sie eine technische Support-Anfrage für Ihre API-Anfragen.</p>
+                    <form id="supportForm">
+                        <div class="support-group">
+                            <h4>Allgemeine Informationen</h4>
+                            <div class="mb-3">
+                                <label for="interfacePartnerNumber" class="form-label">InterfacePartnerNumber</label>
+                                <input type="text" class="form-control" id="interfacePartnerNumber" placeholder="z.B. 1330005" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contact" class="form-label">Kontakt</label>
+                                <input type="text" class="form-control" id="contact" placeholder="z.B. Max Mustermann, max@beispiel.de" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="datApplication" class="form-label">Bezeichnung DAT Anwendung</label>
+                                <input type="text" class="form-control" id="datApplication" placeholder="z.B. SilverDAT 3 Configuration" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="sstFunction" class="form-label">SST Funktion</label>
+                                <input type="text" class="form-control" id="sstFunction" placeholder="z.B. VIN-Abfrage" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="requestType" class="form-label">Typ der Anfrage</label>
+                                <select class="form-select" id="requestType" onchange="toggleErrorDetails()" required>
+                                    <option value="">Bitte auswählen</option>
+                                    <option value="error">Fehler</option>
+                                    <option value="inquiry">Anfrage</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="support-group error-details" id="errorDetails">
+                            <h4>Fehlerdetails</h4>
+                            <div class="mb-3">
+                                <label for="request" class="form-label required">Request</label>
+                                <textarea class="form-control" id="request" rows="5" placeholder="Geben Sie den Request ein (z.B. SOAP-XML)" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="response" class="form-label required">Response</label>
+                                <textarea class="form-control" id="response" rows="5" placeholder="Geben Sie die Response ein" required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="errorMessage" class="form-label required">Fehlermeldung</label>
+                                <textarea class="form-control" id="errorMessage" rows="3" placeholder="Beschreiben Sie die Fehlermeldung" required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="support-group">
+                            <h4>Zusätzliche Informationen</h4>
+                            <div class="mb-3">
+                                <label for="apiEndpoint" class="form-label">API-Endpunkt URL</label>
+                                <input type="text" class="form-control" id="apiEndpoint" placeholder="z.B. https://api.dat.de/v1/endpoint">
+                            </div>
+                            <div class="mb-3">
+                                <label for="issueDescription" class="form-label">Beschreibung des Problems</label>
+                                <textarea class="form-control" id="issueDescription" rows="5" placeholder="Beschreiben Sie das Problem, z.B. erwartetes Verhalten, tatsächliches Verhalten"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">API Support-Anfrage senden</button>
+                    </form>
+                </div>
+
+                <!-- Lizenzübersicht -->
+                <div id="license-overview-content" class="content-area">
+                    <h2>Lizenzübersicht</h2>
+                    <p>Ihre Lizenz- und Produktinformationen auf einen Blick.</p>
+
+                    <!-- Tab-Navigation -->
+                    <div class="tab-buttons" role="tablist">
+                        <button class="tab-btn active" data-tab="license-details" role="tab">Lizenzdetails</button>
+                        <button class="tab-btn" data-tab="product-variants" role="tab">Meine Produkte</button>
+                    </div>
+
+                    <!-- Tab-Inhalte -->
+                    <div class="tab-content active" id="license-details">
+                        <div class="license-card">
+                            <div class="license-group">
+                                <h4>Kundendaten</h4>
+                                <p><strong>Kundennummer:</strong><span style="margin-left: auto;">1000000</span></p>
+                                <p><strong>interfacePartnerSignature:</strong><span style="margin-left: auto;">C03DC71FBAFE7A73503C9BDC336FDE02662538CEF7503F7105E9C3250FD</span><i class="bi bi-info-circle tooltip-icon" title="Ein eindeutiger SHA256 Hash für den Schnittstellenpartner."></i></p>
+                                <p><strong>customerLogin:</strong><span style="margin-left: auto;">tsnioan</span></p>
+                                <p><strong>Name:</strong><span style="margin-left: auto;">APIXPert</span></p>
+                                <p><strong>Name 2:</strong><span style="margin-left: auto;">Bitte nicht löschen!!!!</span></p>
+                                <p><strong>Name 3:</strong><span style="margin-left: auto;">DAT</span></p>
+                            </div>
+                            <hr>
+                            <div class="license-group">
+                                <h4>Lizenzdetails</h4>
+                                <p><strong>Lizenznummer:</strong><span style="margin-left: auto;">100000.0078.011.1407</span></p>
+                                <p><strong>Status:</strong><span style="margin-left: auto;"><span class="status status-active">Aktiv</span></span></p>
+                            </div>
+                            <hr>
+                            <div class="license-group">
+                                <h4>Kontaktinformationen</h4>
+                                <p><strong>E-Mail:</strong><span style="margin-left: auto;">-</span></p>
+                                <p><strong>Telefonnummer / Telefax:</strong><span style="margin-left: auto;">030-6096767</span></p>
+                                <p><strong>Land:</strong><span style="margin-left: auto;">-</span></p>
+                                <p><strong>Adresse:</strong><span style="margin-left: auto;">Helmunth-Hirth-Str. 1, 73760 Ostfildern</span></p>
+                            </div>
+                            <hr>
+                            <div class="license-group">
+                                <h4>Technische Details</h4>
+                                <p><strong>IP Adresse / CIDR Notation:</strong><span style="margin-left: auto;">-</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="product-variants">
+                        <div class="variant-cards">
+                            <div class="variant-card">
+                                <h4>Schnittstellenpartner</h4>
+                                <p><strong>Benutzer:</strong> 999</p>
+                                <p><strong>Beginndatum:</strong> 20.02.2013</p>
+                                <p><strong>Ablaufdatum:</strong> <span class="status status-active">Unbegrenzt</span></p>
+                                <p><strong>Dienste:</strong> Erweiterte VIN-Abfrage, InternalDataExchange, Valuation Trigger, SystemStatus</p>
+                                <p><strong>Produktkontext:</strong> Benutzer- und Rechteverwaltung, DAT Europe-Code@, Auswahl SilverDAT myClaim <i class="bi bi-info-circle tooltip-icon" title="Produktkontext beschreibt die zugehörigen Module und Berechtigungen dieser Lizenz."></i></p>
+                                <button class="action-btn">Lizenz verlängern</button>
+                                <button class="support-btn">Support kontaktieren</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interface Compendium -->
+                <div id="interface-compendium-content" class="content-area">
+                    <h2>Interface Compendium / API Dokumentation</h2>
+                    <p>Das Interface Compendium bietet eine umfassende Übersicht und Dokumentation aller verfügbaren APIs und Schnittstellen von DAT. Hier finden Sie detaillierte Beschreibungen, technische Spezifikationen und Anleitungen zur Nutzung.</p>
+                    <button class="btn btn-primary" onclick="openInterfaceCompendium()">Interface Compendium</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Kacheln-Interaktivität
+        document.addEventListener('DOMContentLoaded', function () {
+            const iconSections = document.querySelectorAll('.icon-section');
+            iconSections.forEach(section => {
+                section.addEventListener('click', function () {
+                    const contentId = this.getAttribute('data-content');
+                    showContent(contentId);
+                });
+            });
+
+            // Tab-Switching
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const tabId = button.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(tab => {
+                        tab.classList.remove('active');
+                        if (tab.id === tabId) tab.classList.add('active');
+                    });
+                });
+            });
+
+            // Filter für Varianten
+            window.filterVariants = function(status) {
+                const variantCards = document.querySelectorAll('.variant-card');
+                variantCards.forEach(card => {
+                    const statusElement = card.querySelector('.status');
+                    const cardStatus = statusElement.className.match(/status-(active|warning|inactive)/)[0];
+                    if (status === 'all' || cardStatus === `status-${status}`) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            };
+
+            // Dynamische Anzeige der Fehlerdetails
+            window.toggleErrorDetails = function() {
+                const requestType = document.getElementById('requestType').value;
+                const errorDetails = document.getElementById('errorDetails');
+                const requestField = document.getElementById('request');
+                const responseField = document.getElementById('response');
+                const errorMessageField = document.getElementById('errorMessage');
+
+                if (requestType === 'error') {
+                    errorDetails.classList.add('active');
+                    requestField.setAttribute('required', 'required');
+                    responseField.setAttribute('required', 'required');
+                    errorMessageField.setAttribute('required', 'required');
+                } else {
+                    errorDetails.classList.remove('active');
+                    requestField.removeAttribute('required');
+                    responseField.removeAttribute('required');
+                    errorMessageField.removeAttribute('required');
+                }
+            };
+        });
+
+        // Inhalt anzeigen/verbergen
+        function showContent(contentId) {
+            const contents = document.querySelectorAll('.content-area');
+            contents.forEach(content => content.classList.remove('active'));
+            document.getElementById(contentId + '-content').classList.add('active');
+        }
+
+        // Wizard-Logik
+        const wizardSteps = document.querySelectorAll('.wizard-step');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const recommendedApi = document.getElementById('recommended-api');
+        const purchaseBtn = document.getElementById('purchaseBtn');
+        let currentStep = 0;
+
+        function showStep(step) {
+            wizardSteps.forEach((s, index) => {
+                s.classList.toggle('active', index === step);
+            });
+            prevBtn.disabled = step === 0;
+            nextBtn.textContent = step === wizardSteps.length - 1 ? 'Fertig' : 'Weiter';
+            purchaseBtn.style.display = step === 2 ? 'block' : 'none';
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStep < wizardSteps.length - 1) {
+                if (currentStep === 0) {
+                    const dataType = document.querySelector('input[name="dataType"]:checked')?.value;
+                    if (!dataType) {
+                        alert('Bitte wählen Sie eine Option aus.');
+                        return;
+                    }
+                } else if (currentStep === 1) {
+                    const dataType = document.querySelector('input[name="dataType"]:checked').value;
+                    const industry = document.querySelector('input[name="industry"]:checked')?.value;
+                    if (!industry) {
+                        alert('Bitte wählen Sie eine Option aus.');
+                        return;
+                    }
+                    if (dataType === 'valuation' && industry === 'finance') {
+                        recommendedApi.textContent = 'Schnittstellenpartner';
+                    } else if (dataType === 'parts' && industry === 'repair') {
+                        recommendedApi.textContent = 'SilverDAT calculateGlass';
+                    } else if (dataType === 'config' && industry === 'insurance') {
+                        recommendedApi.textContent = 'SilverDAT 3 Configuration';
+                    } else {
+                        recommendedApi.textContent = 'Keine passende API gefunden';
+                    }
+                }
+                currentStep++;
+                showStep(currentStep);
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 0) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        });
+
+        function purchaseAPI() {
+            const recommended = recommendedApi.textContent;
+            if (recommended !== 'Keine passende API gefunden') {
+                alert(`Sie haben ${recommended} ausgewählt. Weiterleitung zum Kaufprozess...`);
+            } else {
+                alert('Es wurde keine passende API empfohlen. Bitte wählen Sie andere Optionen.');
+            }
+        }
+
+        // Interface Compendium Button Logik
+        function openInterfaceCompendium() {
+            alert('Weiterleitung zum Interface Compendium...'); // Platzhalter für tatsächliche Navigation
+        }
+
+        showStep(currentStep);
+    </script>
+</body>
+</html>
